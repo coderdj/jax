@@ -7,13 +7,11 @@ import hax
 raw_data_path = "/data/xenon/raw/"
 SF_MIN=100
 SF_MAX=1000
-N_PROC=10
+N_PROC=50
 runsdb = ( "mongodb://"+os.getenv("RUNS_MONGO_USER")+":"
            +os.getenv("RUNS_MONGO_PASSWORD")+"@gw:27017/run")
 mondb = ( "mongodb://"+os.getenv("MON_MONGO_USER")+":"
           +os.getenv("MON_MONGO_PASSWORD")+"@gw:27018/admin")
-hax.init(experiment="XENON1T", raw_data_local_path=raw_data_path,
-         pax_version_policy="loose")
 
 
 def main():
@@ -134,7 +132,16 @@ def RunFinished(number):
 def ProcessEvent(event_numbers, run_name):
     print("Processing " + str(len(event_numbers)) + " events starting with "+
           str(event_numbers[0])+" from run " + run_name)
-    #time.sleep(1)
+
+    hax.init(experiment="XENON1T", raw_data_local_path=raw_data_path,
+         pax_version_policy="loose")
+
+    try:
+        mon_database = pymongo.MongoClient(mondb)['monitor']
+    except:
+        print("Failed connecting to monitoring DB")
+        return False
+
 
     events = hax.raw_data.process_events(run_name, event_numbers, 
                                          {"pax":
@@ -177,7 +184,7 @@ def ProcessEvent(event_numbers, run_name):
             insert_doc['x'] = event.interactions[0].x
             insert_doc['y'] = event.interactions[0].y
         print(insert_doc)
-    
+        mon_database[run_name].insert_one(insert_doc)
     return True
 
 main()
