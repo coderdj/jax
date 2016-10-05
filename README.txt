@@ -1,3 +1,8 @@
+Note: this code has been completely refactored and included in the 
+XENON1T github here: https://github.com/XENON1T/jax
+The version shown here is completely different and was an early alpha
+version.
+
 Online data monitor backend script for XENON1T
 D.Coderre 30.8.2016
 
